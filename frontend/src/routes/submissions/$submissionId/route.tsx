@@ -28,6 +28,10 @@ const SubmissionInfo = ({ submission }: { submission: Submission }) => {
             <dd>{submission.id}</dd>
           </div>
           <div>
+            <dt className="font-semibold">提出日時</dt>
+            <dd>{submission.submitted_at}</dd>
+          </div>
+          <div>
             <dt className="font-semibold">学生ID</dt>
             <dd>{submission.student_id}</dd>
           </div>

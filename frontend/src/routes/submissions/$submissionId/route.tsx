@@ -56,6 +56,22 @@ const SubmissionInfo = ({ submission }: { submission: Submission }) => {
   )
 }
 
+const CodeWithLineNumbers = ({ code }: { code: string }) => {
+  const lines = code.split('\n')
+  return (
+    <div className="flex">
+      <pre className="text-gray-500 pr-4 text-right select-none">
+        {lines.map((_, i) => (
+          <div key={i + 1}>{i + 1}</div>
+        ))}
+      </pre>
+      <pre className="flex-1">
+        <code>{code}</code>
+      </pre>
+    </div>
+  )
+}
+
 const SubmissionedCode = ({ submission }: { submission: Submission }) => {
   return  (  
     <Card>
@@ -63,9 +79,9 @@ const SubmissionedCode = ({ submission }: { submission: Submission }) => {
         <CardTitle>提出されたコード</CardTitle>
       </CardHeader>
       <CardContent>
-        <pre className="bg-gray-100 p-4 rounded-md overflow-x-auto ">
-          <code>{submission.code}</code>
-        </pre>
+        <div className="bg-gray-100 p-4 rounded-md overflow-x-auto ">
+          <CodeWithLineNumbers code={submission.code} />
+        </div>
       </CardContent>
     </Card>
   )

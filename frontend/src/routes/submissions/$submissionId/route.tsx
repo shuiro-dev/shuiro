@@ -20,9 +20,11 @@ import { Label } from "@radix-ui/react-label"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
   ArrowLeft,
+  Check,
   CheckCircle,
   ChevronDown,
   ChevronUp,
+  Copy,
   XCircle,
 } from "lucide-react"
 import { components } from "openapi/schema"
@@ -93,10 +95,30 @@ const CodeWithLineNumbers = ({ code }: { code: string }) => {
 }
 
 const SubmissionedCode = ({ submission }: { submission: Submission }) => {
+  const [isCopied, setIsCopied] = useState(false)
+
+  const copyToClipboard = async () => {
+    try {
+      await navigator.clipboard.writeText(submission.code)
+      setIsCopied(true)
+      setTimeout(() => setIsCopied(false), 2000)
+    } catch (err) {
+      console.error("Failed to copy text: ", err)
+    }
+  }
   return (
     <Card>
       <CardHeader>
         <CardTitle>提出されたコード</CardTitle>
+        <div className="relative">
+          <button
+            aria-label="コードをコピー"
+            className="absolute top-2 right-2 p-2 bg-white rounded-md shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            onClick={copyToClipboard}
+          >
+            {isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+          </button>
+        </div>
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto rounded-md bg-gray-100 p-4">

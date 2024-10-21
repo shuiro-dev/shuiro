@@ -182,7 +182,7 @@ const TestResults = ({
                                 : "データがありません"}
                             </code>
                           </pre>
-                          <h4 className="mb-2 font-semibold">出力:</h4>
+                          <h4 className="mb-2 font-semibold">正解出力:</h4>
                           <pre className="overflow-x-auto rounded-md bg-white p-2">
                             <code>
                               {testCases && testCases[index]

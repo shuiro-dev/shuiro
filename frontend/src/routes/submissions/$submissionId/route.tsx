@@ -4,12 +4,13 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow} from "@/
 import { Textarea } from "@/components/ui/textarea"
 import { $api } from "@/lib/api"
 import { Label } from "@radix-ui/react-label"
-import { createFileRoute } from "@tanstack/react-router"
-import { CheckCircle, XCircle } from "lucide-react"
+import { createFileRoute, Link } from "@tanstack/react-router"
+import { ArrowLeft, CheckCircle, ChevronDown, ChevronUp, XCircle } from "lucide-react"
 import { components } from "openapi/schema"
 import { useState } from "react"
 
 type Submission = components["schemas"]["Submission"]
+type TestCase = components["schemas"]["TestCase"]
 
 const SubmissionInfo = ({ submission }: { submission: Submission }) => {
   return (
@@ -87,7 +88,8 @@ const SubmissionedCode = ({ submission }: { submission: Submission }) => {
   )
 }
 
-const TestResults = ({ submission }: { submission: Submission}) => {
+const TestResults = ({ submission, testCases }: { submission: Submission, testCases: TestCase[]}) => {
+  const [isOpen, setIsOpen] = useState(false)
   return (
     <Card>
       <CardHeader>
@@ -103,14 +105,35 @@ const TestResults = ({ submission }: { submission: Submission}) => {
             </TableRow>
           </TableHeader>
           <TableBody>
-            {submission.test_results.map((TestResults) => (
-              <TableRow key={TestResults.test_case_id}>
-                <TableCell>{TestResults.test_case_id}</TableCell>
-                <TableCell className={TestResults.status === "Passed" ? "text-green-500" : "text-red-500"}>
-                  {TestResults.status}
-                </TableCell>
-                <TableCell>{TestResults.message || '-'}</TableCell>
-              </TableRow>
+            {submission.test_results.map((TestResults, index) => ( // テスト結果とテストケースの順番が対応するかどうか確認
+              <>
+                <TableRow className="cursor-pointer hover:bg-gray-100" key={TestResults.test_case_id} onClick={() => setIsOpen(!isOpen)} >
+                  <TableCell>{TestResults.test_case_id}</TableCell>
+                  <TableCell className={TestResults.status === "Passed" ? "text-green-500" : "text-red-500"}>
+                    {TestResults.status}
+                  </TableCell>
+                  <TableCell>{TestResults.message || '-'}</TableCell>
+                  <TableCell>
+                    {isOpen ? <ChevronUp className="w-4 h-4" /> : <ChevronDown className="w-4 h-4" />}
+                  </TableCell>
+                </TableRow>
+                {isOpen && (
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <div className="p-4 bg-gray-50 rounded-md">
+                        <h4 className="font-semibold mb-2">入力:</h4>
+                        <pre className="bg-white p-2 rounded-md mb-4 overflow-x-auto">
+                       <code>{testCases && testCases[index] ? testCases[index].input : 'データがありません'}</code>
+                        </pre>
+                        <h4 className="font-semibold mb-2">出力:</h4>
+                        <pre className="bg-white p-2 rounded-md overflow-x-auto">
+                        <code>{testCases && testCases[index] ? testCases[index].output : 'データがありません'}</code>
+                        </pre>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                )}
+              </>
             ))}
           </TableBody>
         </Table>
@@ -155,8 +178,17 @@ const Feedback = () => {
 const SubmissionDetail = () => {
   const submissionId= Number.parseInt(Route.useParams().submissionId)
   const { data } = $api.useSuspenseQuery("get", "/api/submissions/{submissionId}", { params: { path: { submissionId } } })
+  const problemData = $api.useSuspenseQuery("get", "/api/problems/{problemId}", { params: { path: { problemId: data.problem_id } } })
   return (
     <div className="container mx-auto p-4">
+      <div className="mb-6">
+        <Link href="/admin/submissions" >
+          <Button size="sm" variant="outline">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            提出一覧に戻る
+          </Button>
+        </Link>
+      </div>
       <h1 className="text-2xl font-bold mb-6">
         提出詳細
       </h1>
@@ -168,7 +200,7 @@ const SubmissionDetail = () => {
           <SubmissionedCode submission={data} />
         </div>
         <div className="order-3 lg:col-span-2">
-          <TestResults submission={data} />
+          <TestResults submission={data} testCases={problemData.data.test_cases} />
         </div>
         <div className="order-4 lg:col-span-2">
           <Feedback />

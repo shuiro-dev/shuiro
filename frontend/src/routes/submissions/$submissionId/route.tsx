@@ -114,8 +114,8 @@ const TestResults = ({
   submission: Submission
   testCases: TestCase[]
 }) => {
-  const [openIndexes, setOpenIndexes] = useState<boolean[]>(() => 
-    submission.test_results.map(() => false)
+  const [openIndexes, setOpenIndexes] = useState<boolean[]>(() =>
+    submission.test_results.map(() => false),
   )
 
   const toggleOpen = (index: number) => {

@@ -36,7 +36,7 @@ type TestCase = components["schemas"]["TestCase"]
 
 const SubmissionInfo = ({ submission }: { submission: Submission }) => {
   return (
-    <Card>
+    <Card className="h-full">
       <CardHeader>
         <CardTitle>基本情報</CardTitle>
       </CardHeader>
@@ -79,6 +79,28 @@ const SubmissionInfo = ({ submission }: { submission: Submission }) => {
   )
 }
 
+const ReadOnlyCodeBlock = ({
+  code,
+  language,
+}: {
+  code: string
+  language: string
+}) => {
+  return (
+    <MonacoEditor
+      height="100%"
+      language={language}
+      options={{
+        lineNumbers: "on",
+        minimap: { enabled: false },
+        readOnly: true,
+        scrollBeyondLastLine: false,
+      }}
+      value={code}
+    />
+  )
+}
+
 const SubmissionedCode = ({ submission }: { submission: Submission }) => {
   const [isCopied, setIsCopied] = useState(false)
 
@@ -92,22 +114,31 @@ const SubmissionedCode = ({ submission }: { submission: Submission }) => {
     }
   }
   return (
-    <Card>
+    <Card className="flex flex-1 flex-col">
+      {" "}
+      {/* 高さを親の高さに合わせ、flexでレイアウト */}
       <CardHeader>
         <CardTitle>提出されたコード</CardTitle>
         <div className="relative">
           <button
             aria-label="コードをコピー"
-            className="absolute top-2 right-2 p-2 bg-white rounded-md shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+            className="absolute right-2 top-2 rounded-md bg-white p-2 shadow-sm hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
             onClick={copyToClipboard}
           >
-            {isCopied ? <Check className="w-4 h-4 text-green-500" /> : <Copy className="w-4 h-4" />}
+            {isCopied ? (
+              <Check className="h-4 w-4 text-green-500" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
           </button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div className="overflow-x-auto rounded-md bg-gray-100 p-4">
-          <MonacoEditor height="400px" language={submission.language.name} options={{lineNumbers: "on", minimap: {enabled: false}, readOnly:true, scrollBeyondLastLine: false, }} value={submission.code} />
+      <CardContent className="flex-1 overflow-auto">
+        <div className="h-full overflow-x-auto rounded-md bg-gray-100 p-4">
+          <ReadOnlyCodeBlock
+            code={submission.code}
+            language={submission.language.name.toLowerCase()}
+          />
         </div>
       </CardContent>
     </Card>
@@ -147,63 +178,58 @@ const TestResults = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {submission.test_results.map(
-              (
-                TestResults,
-                index, // テスト結果とテストケースの順番が対応するかどうか確認
-              ) => (
-                <>
-                  <TableRow
-                    className="cursor-pointer hover:bg-gray-100"
-                    key={TestResults.test_case_id}
-                    onClick={() => toggleOpen(index)}
+            {submission.test_results.map((TestResults, index) => (
+              <>
+                <TableRow
+                  className="cursor-pointer hover:bg-gray-100"
+                  key={TestResults.test_case_id}
+                  onClick={() => toggleOpen(index)}
+                >
+                  <TableCell>{TestResults.test_case_id}</TableCell>
+                  <TableCell
+                    className={
+                      TestResults.status === "Passed"
+                        ? "text-green-500"
+                        : "text-red-500"
+                    }
                   >
-                    <TableCell>{TestResults.test_case_id}</TableCell>
-                    <TableCell
-                      className={
-                        TestResults.status === "Passed"
-                          ? "text-green-500"
-                          : "text-red-500"
-                      }
-                    >
-                      {TestResults.status}
-                    </TableCell>
-                    <TableCell>{TestResults.message || "-"}</TableCell>
-                    <TableCell>
-                      {openIndexes[index] ? (
-                        <ChevronUp className="h-4 w-4" />
-                      ) : (
-                        <ChevronDown className="h-4 w-4" />
-                      )}
+                    {TestResults.status}
+                  </TableCell>
+                  <TableCell>{TestResults.message || "-"}</TableCell>
+                  <TableCell>
+                    {openIndexes[index] ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </TableCell>
+                </TableRow>
+                {openIndexes[index] && (
+                  <TableRow>
+                    <TableCell colSpan={4}>
+                      <div className="rounded-md bg-gray-50 p-4">
+                        <h4 className="mb-2 font-semibold">入力:</h4>
+                        <pre className="mb-4 overflow-x-auto rounded-md bg-white p-2">
+                          <code>
+                            {testCases && testCases[index]
+                              ? testCases[index].input
+                              : "データがありません"}
+                          </code>
+                        </pre>
+                        <h4 className="mb-2 font-semibold">正解出力:</h4>
+                        <pre className="overflow-x-auto rounded-md bg-white p-2">
+                          <code>
+                            {testCases && testCases[index]
+                              ? testCases[index].output
+                              : "データがありません"}
+                          </code>
+                        </pre>
+                      </div>
                     </TableCell>
                   </TableRow>
-                  {openIndexes[index] && (
-                    <TableRow>
-                      <TableCell colSpan={4}>
-                        <div className="rounded-md bg-gray-50 p-4">
-                          <h4 className="mb-2 font-semibold">入力:</h4>
-                          <pre className="mb-4 overflow-x-auto rounded-md bg-white p-2">
-                            <code>
-                              {testCases && testCases[index]
-                                ? testCases[index].input
-                                : "データがありません"}
-                            </code>
-                          </pre>
-                          <h4 className="mb-2 font-semibold">正解出力:</h4>
-                          <pre className="overflow-x-auto rounded-md bg-white p-2">
-                            <code>
-                              {testCases && testCases[index]
-                                ? testCases[index].output
-                                : "データがありません"}
-                            </code>
-                          </pre>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  )}
-                </>
-              ),
-            )}
+                )}
+              </>
+            ))}
           </TableBody>
         </Table>
       </CardContent>
@@ -215,7 +241,6 @@ const Feedback = () => {
   const [feedback, setFeedback] = useState("")
 
   const handleFeedbackSubmit = async () => {
-    // ここでフィードバックを送信する処理を実装する
     console.log("フィードバックを送信:", feedback)
     setFeedback("")
   }
@@ -257,7 +282,7 @@ const SubmissionDetail = () => {
     { params: { path: { problemId: data.problem_id } } },
   )
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto flex h-screen flex-col p-4">
       <div className="mb-6">
         <Link href="/admin/submissions">
           <Button size="sm" variant="outline">
@@ -267,22 +292,16 @@ const SubmissionDetail = () => {
         </Link>
       </div>
       <h1 className="mb-6 text-2xl font-bold">提出詳細</h1>
-      <div className="flex flex-col gap-6 lg:grid lg:grid-cols-3">
-        <div className="order-1 lg:col-span-2">
+      <div className="flex flex-1 gap-6">
+        <div className="flex flex-1 flex-col">
           <SubmissionInfo submission={data} />
-        </div>
-        <div className="order-2 lg:order-3 lg:col-span-1">
-          <SubmissionedCode submission={data} />
-        </div>
-        <div className="order-3 lg:col-span-2">
           <TestResults
             submission={data}
             testCases={problemData.data.test_cases}
           />
-        </div>
-        <div className="order-4 lg:col-span-2">
           <Feedback />
         </div>
+        <SubmissionedCode submission={data} />
       </div>
     </div>
   )

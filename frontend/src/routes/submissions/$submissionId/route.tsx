@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/table"
 import { Textarea } from "@/components/ui/textarea"
 import { $api } from "@/lib/api"
+import MonacoEditor from "@monaco-editor/react"
 import { Label } from "@radix-ui/react-label"
 import { createFileRoute, Link } from "@tanstack/react-router"
 import {
@@ -78,22 +79,6 @@ const SubmissionInfo = ({ submission }: { submission: Submission }) => {
   )
 }
 
-const CodeWithLineNumbers = ({ code }: { code: string }) => {
-  const lines = code.split("\n")
-  return (
-    <div className="flex">
-      <pre className="select-none pr-4 text-right text-gray-500">
-        {lines.map((_, i) => (
-          <div key={i + 1}>{i + 1}</div>
-        ))}
-      </pre>
-      <pre className="flex-1">
-        <code>{code}</code>
-      </pre>
-    </div>
-  )
-}
-
 const SubmissionedCode = ({ submission }: { submission: Submission }) => {
   const [isCopied, setIsCopied] = useState(false)
 
@@ -102,8 +87,8 @@ const SubmissionedCode = ({ submission }: { submission: Submission }) => {
       await navigator.clipboard.writeText(submission.code)
       setIsCopied(true)
       setTimeout(() => setIsCopied(false), 2000)
-    } catch (err) {
-      console.error("Failed to copy text: ", err)
+    } catch (error) {
+      console.error("Failed to copy text:", error)
     }
   }
   return (
@@ -122,7 +107,7 @@ const SubmissionedCode = ({ submission }: { submission: Submission }) => {
       </CardHeader>
       <CardContent>
         <div className="overflow-x-auto rounded-md bg-gray-100 p-4">
-          <CodeWithLineNumbers code={submission.code} />
+          <MonacoEditor height="400px" language={submission.language.name} options={{lineNumbers: "on", minimap: {enabled: false}, readOnly:true, scrollBeyondLastLine: false, }} value={submission.code} />
         </div>
       </CardContent>
     </Card>
@@ -231,7 +216,7 @@ const Feedback = () => {
 
   const handleFeedbackSubmit = async () => {
     // ここでフィードバックを送信する処理を実装する
-    console.log("フィードバックを送信: ", feedback)
+    console.log("フィードバックを送信:", feedback)
     setFeedback("")
   }
 

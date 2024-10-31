@@ -32,6 +32,7 @@ const IndexLazyRoute = IndexLazyImport.update({
 
 const SubmissionsSubmissionIdRouteRoute =
   SubmissionsSubmissionIdRouteImport.update({
+    id: "/submissions/$submissionId",
     path: "/submissions/$submissionId",
     getParentRoute: () => rootRoute,
   } as any)

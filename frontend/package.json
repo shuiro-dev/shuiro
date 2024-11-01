@@ -57,7 +57,7 @@
     "eslint-plugin-react-refresh": "0.4.13",
     "eslint-plugin-unicorn": "56.0.0",
     "globals": "15.11.0",
-    "msw": "2.4.11",
+    "msw": "2.6.0",
     "openapi": "workspace:*",
     "openapi-typescript": "7.4.1",
     "postcss": "8.4.47",

@@ -576,6 +576,92 @@
           }
         }
       }
+    },
+    "/api/generate-test-case": {
+      "post": {
+        "operationId": "generateTestCase",
+        "summary": "コードを実行し、生成した複数のテストケースを返す",
+        "tags": [
+          "code"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "code": {
+                    "type": "string"
+                  },
+                  "count": {
+                    "type": "number",
+                    "minimum": 1,
+                    "default": 1
+                  },
+                  "inputStatus": {
+                    "type": "string"
+                  },
+                  "language": {
+                    "type": "object",
+                    "properties": {
+                      "name": {
+                        "type": "string"
+                      },
+                      "version": {
+                        "type": "string"
+                      }
+                    },
+                    "required": [
+                      "name",
+                      "version"
+                    ]
+                  }
+                },
+                "required": [
+                  "code",
+                  "inputStatus",
+                  "language"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "生成したテストケースの配列",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "input": {
+                            "type": "string"
+                          },
+                          "output": {
+                            "type": "string"
+                          }
+                        },
+                        "required": [
+                          "input",
+                          "output"
+                        ]
+                      }
+                    }
+                  },
+                  "required": [
+                    "results"
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

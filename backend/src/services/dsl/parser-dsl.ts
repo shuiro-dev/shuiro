@@ -2,7 +2,7 @@ import type { CallNode, DSLArg } from "./types"
 
 /**
  * DSL文字列をパースし、CallNode[] に変換する
- * 例: "int(1..100).array(3..5, unique=true)"
+ * 例: "int(1,100).array(3,5, unique=true)"
  */
 export function parseDSL(dsl: string): CallNode[] {
   // 既存は split('.') を使っていたが、トップレベルでの分割を行う splitDSL を使用
@@ -36,8 +36,8 @@ function parseArgs(argString: string): DSLArg[] {
   const args: DSLArg[] = []
 
   for (const token of tokens) {
-    // 1) range: "x..y"
-    const rangeMatch = token.match(/^([\d+.-]+)\.\.([\d+.-]+)$/)
+    // 1) range: "x,y"
+    const rangeMatch = token.match(/^([\d+.-]+),([\d+.-]+)$/)
     if (rangeMatch) {
       const minVal = Number.parseFloat(rangeMatch[1])
       const maxVal = Number.parseFloat(rangeMatch[2])
@@ -78,8 +78,7 @@ function parseArgs(argString: string): DSLArg[] {
 
 /**
  * DSL文字列をトップレベルの '.' で分割する関数
- * 例えば "int(1..100).array(3..5)" なら ["int(1..100)", "array(3..5)"]
- * "int(1..100)" のように '.' が引数中にあってもトップレベルでなければ分割しない。
+ * 例えば "int(1,100).array(3,5)" なら ["int(1,100)", "array(3,5)"]
  */
 function splitDSL(dsl: string): string[] {
   const parts: string[] = []

@@ -37,7 +37,7 @@ function parseArgs(argString: string): DSLArg[] {
 
   for (const token of tokens) {
     // 1) range: "x,y"
-    const rangeMatch = token.match(/^([\d+.-]+),([\d+.-]+)$/)
+    const rangeMatch = token.match(/^([\d+.-]+):([\d+.-]+)$/)
     if (rangeMatch) {
       const minVal = Number.parseFloat(rangeMatch[1])
       const maxVal = Number.parseFloat(rangeMatch[2])

@@ -299,7 +299,7 @@ export const ProblemForm: FC<ProblemFormProps> = ({
             <Label>DSL (入力生成ルール)</Label>
             <Textarea
               onChange={(e) => setDsl(e.target.value)}
-              placeholder='例: "int(1..100)" のようなDSLを記述'
+              placeholder='例: "int(1:100).array(3:8)" のようなDSLを記述'
               value={dsl}
             />
           </div>

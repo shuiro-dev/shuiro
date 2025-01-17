@@ -10,7 +10,7 @@ import { parseDSL } from "./parser-dsl"
 /**
  * AST(CallNode[]) を評価して「ランダム生成関数 (ジェネレータ)」を返す。
  * 例:
- *   const ast = parseDSL("int(1..100).array(3..5, unique=true)");
+ *   const ast = parseDSL("int(1:100).array(3:5, unique=true)");
  *   const gen = evaluateCallNodes(ast);
  *   console.log(gen()); // => [ 45, 12, 76, ... ] など
  */
@@ -31,13 +31,12 @@ function evaluateCallNodes(callNodes: CallNode[]): () => unknown {
 
     switch (functionName) {
       case "array": {
-        // DSL例: array(3..5, unique=true)
+        // DSL例: array(3:5, unique=true)
         const rangeArg = args.find((a) => a.type === "range") as
           | ArgRange
           | undefined
         const minLen = rangeArg ? rangeArg.min : 1
         const maxLen = rangeArg ? rangeArg.max : 1
-        const length = faker.number.int({ max: maxLen, min: minLen })
 
         const uniqueOption = args.find(
           (a) => a.type === "option" && a.key === "unique",
@@ -46,6 +45,7 @@ function evaluateCallNodes(callNodes: CallNode[]): () => unknown {
 
         const oldGen = currentValueGenerator
         currentValueGenerator = () => {
+          const length = faker.number.int({ max: maxLen, min: minLen })
           // oldGen = "単一要素生成関数"
           return isUnique
             ? faker.helpers.uniqueArray(() => oldGen(), length)
@@ -55,7 +55,7 @@ function evaluateCallNodes(callNodes: CallNode[]): () => unknown {
       }
 
       case "float": {
-        // DSL例: float(0..1) -> floatBetween(0,1,4)
+        // DSL例: float(0:1) -> floatBetween(0,1,4)
         const rangeArg = args.find((a) => a.type === "range") as
           | ArgRange
           | undefined
@@ -66,7 +66,7 @@ function evaluateCallNodes(callNodes: CallNode[]): () => unknown {
       }
 
       case "int": {
-        // DSL例: int(1..100) -> numberBetween(1, 100)
+        // DSL例: int(1:100) -> numberBetween(1, 100)
         const rangeArg = args.find((a) => a.type === "range") as
           | ArgRange
           | undefined

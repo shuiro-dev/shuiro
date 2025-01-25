@@ -14,6 +14,14 @@ type AuthenticationResponse = {
 type AuthenticationVerifyResponse =
   paths["/api/authenticate/verify"]["post"]["responses"]["200"]["content"]["application/json"]
 
+/**
+ * パスキー認証のカスタムフック
+ * @returns {{
+ *   login: (email: string) => Promise<AuthenticationVerifyResponse>,
+ *   isLoading: boolean,
+ *   error: Error | null
+ * }}
+ */
 export function usePasskeyAuthentication() {
   const authMutation = useMutation({
     mutationFn: async (email: string): Promise<AuthenticationResponse> => {
@@ -116,6 +124,11 @@ export function usePasskeyAuthentication() {
   }
 }
 
+/**
+ * ArrayBufferをBase64URL形式の文字列に変換
+ * @param {ArrayBuffer | ArrayBufferLike} buffer - 変換対象のバッファ
+ * @returns {string} Base64URL形式の文字列
+ */
 function arrayBufferToBase64(buffer: ArrayBuffer | ArrayBufferLike): string {
   const uint8Array =
     buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)
@@ -125,6 +138,11 @@ function arrayBufferToBase64(buffer: ArrayBuffer | ArrayBufferLike): string {
     .replaceAll("=", "")
 }
 
+/**
+ * Base64文字列をArrayBufferに変換
+ * @param {string} base64 - Base64形式の文字列
+ * @returns {Uint8Array} 変換されたUint8Array
+ */
 function base64ToArrayBuffer(base64: string): Uint8Array {
   const standardBase64 = base64
     .replaceAll("-", "+")

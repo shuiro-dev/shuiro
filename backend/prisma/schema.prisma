@@ -83,6 +83,8 @@ model TestCase {
   results   TestResult[]
   createdAt DateTime     @default(now())
   updatedAt DateTime     @updatedAt
+
+  @@unique([input, output, problemId])
 }
 
 model TestResult {
@@ -96,6 +98,8 @@ model TestResult {
   submissionId Int?
   createdAt    DateTime    @default(now())
   updatedAt    DateTime    @updatedAt
+
+  @@unique([testCaseId, submissionId])
 }
 
 model TestStatus {
@@ -155,4 +159,11 @@ model SubmissionResult {
 model SubmissionStatus {
   status  String             @id
   results SubmissionResult[]
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

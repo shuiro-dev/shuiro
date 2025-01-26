@@ -1,3 +1,7 @@
+import {
+  arrayBufferToBase64,
+  base64ToArrayBuffer,
+} from "@/features/auth/hooks/utils"
 import { client } from "@/lib/api"
 import { useMutation } from "@tanstack/react-query"
 import { paths } from "openapi/schema"
@@ -18,13 +22,13 @@ type RegistrationVerifyResponse =
  * パスキー登録のカスタムフック
  */
 export const usePasskeyRegistration = (): {
+  error: Error | null
+  isLoading: boolean
   register: (data: {
     email: string
     name: string
     role: "admin" | "student" | "teacher"
   }) => Promise<RegistrationVerifyResponse>
-  isLoading: boolean
-  error: Error | null
 } => {
   const registerMutation = useMutation({
     mutationFn: async (data: {
@@ -169,47 +173,5 @@ export const usePasskeyRegistration = (): {
     error: registerMutation.error || verifyMutation.error,
     isLoading: registerMutation.isPending || verifyMutation.isPending,
     register,
-  }
-}
-
-/**
- * ArrayBufferをBase64URL形式の文字列に変換
- * @param buffer - 変換対象のバッファ
- * @returns Base64URL形式の文字列
- * @description バイナリデータをBase64URL形式に変換し、Web APIで使用可能な形式にする
- */
-const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
-  const binary = String.fromCodePoint(...new Uint8Array(buffer))
-  return btoa(binary)
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replaceAll("=", "")
-}
-
-/**
- * Base64文字列をArrayBufferに変換
- * @param base64 - Base64形式の文字列
- * @returns 変換されたArrayBuffer
- * @throws {Error} Base64文字列が無効な場合
- */
-const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
-  try {
-    const padded =
-      base64.length % 4 === 0
-        ? base64
-        : base64.padEnd(base64.length + (4 - (base64.length % 4)), "=")
-
-    const standardBase64 = padded.replaceAll("-", "+").replaceAll("_", "/")
-
-    const binaryString = atob(standardBase64)
-    const bytes = new Uint8Array(binaryString.length)
-    for (let i = 0; i < binaryString.length; i++) {
-      bytes[i] = String.prototype.codePointAt.call(binaryString, i) as number
-    }
-    return bytes.buffer as ArrayBuffer
-  } catch (error) {
-    console.error("Base64 decoding error:", error)
-    console.error("Attempted to decode:", base64)
-    throw new Error("Challengeのデコードに失敗しました")
   }
 }

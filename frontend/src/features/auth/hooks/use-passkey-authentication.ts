@@ -1,3 +1,7 @@
+import {
+  arrayBufferToBase64,
+  base64ToArrayBuffer,
+} from "@/features/auth/hooks/utils"
 import { client } from "@/lib/api"
 import { useMutation } from "@tanstack/react-query"
 import { paths } from "openapi/schema"
@@ -18,9 +22,9 @@ type AuthenticationVerifyResponse =
  * パスキー認証のカスタムフック
  */
 export const usePasskeyAuthentication = (): {
-  login: (email: string) => Promise<AuthenticationVerifyResponse>
-  isLoading: boolean
   error: Error | null
+  isLoading: boolean
+  login: (email: string) => Promise<AuthenticationVerifyResponse>
 } => {
   const authMutation = useMutation({
     mutationFn: async (email: string): Promise<AuthenticationResponse> => {
@@ -121,37 +125,4 @@ export const usePasskeyAuthentication = (): {
     isLoading: authMutation.isPending || verifyMutation.isPending,
     login,
   }
-}
-
-/**
- * ArrayBufferをBase64URL形式の文字列に変換
- * @param buffer - 変換対象のバッファ
- * @returns Base64URL形式の文字列
- */
-const arrayBufferToBase64 = (buffer: ArrayBuffer | ArrayBufferLike): string => {
-  const uint8Array =
-    buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)
-  return btoa(String.fromCodePoint(...uint8Array))
-    .replaceAll("+", "-")
-    .replaceAll("/", "_")
-    .replaceAll("=", "")
-}
-
-/**
- * Base64文字列をArrayBufferに変換
- * @param base64 - Base64形式の文字列
- * @returns 変換されたUint8Array
- */
-const base64ToArrayBuffer = (base64: string): Uint8Array => {
-  const standardBase64 = base64
-    .replaceAll("-", "+")
-    .replaceAll("_", "/")
-    .padEnd(base64.length + ((4 - (base64.length % 4)) % 4), "=")
-
-  const binaryString = atob(standardBase64)
-  const bytes = new Uint8Array(binaryString.length)
-  for (let i = 0; i < binaryString.length; i++) {
-    bytes[i] = String.prototype.codePointAt.call(binaryString, i) as number
-  }
-  return bytes
 }

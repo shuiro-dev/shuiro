@@ -240,6 +240,142 @@
           "code",
           "language"
         ]
+      },
+      "AuthenticationChallenge": {
+        "type": "object",
+        "properties": {
+          "challenge": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "challenge"
+        ]
+      },
+      "UserRegistration": {
+        "type": "object",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "name": {
+            "type": "string"
+          },
+          "role": {
+            "type": "string",
+            "enum": [
+              "admin",
+              "teacher",
+              "student"
+            ]
+          }
+        },
+        "required": [
+          "email",
+          "name",
+          "role"
+        ]
+      },
+      "AuthenticationResponse": {
+        "type": "object",
+        "properties": {
+          "token": {
+            "type": "string"
+          }
+        },
+        "required": [
+          "token"
+        ]
+      },
+      "Credential": {
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "rawId": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "public-key"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "rawId",
+          "type"
+        ]
+      },
+      "RegistrationCredential": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Credential"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "response": {
+                "type": "object",
+                "properties": {
+                  "attestationObject": {
+                    "type": "string"
+                  },
+                  "clientDataJSON": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "attestationObject",
+                  "clientDataJSON"
+                ]
+              }
+            },
+            "required": [
+              "response"
+            ]
+          }
+        ]
+      },
+      "AuthenticationCredential": {
+        "allOf": [
+          {
+            "$ref": "#/components/schemas/Credential"
+          },
+          {
+            "type": "object",
+            "properties": {
+              "response": {
+                "type": "object",
+                "properties": {
+                  "authenticatorData": {
+                    "type": "string"
+                  },
+                  "clientDataJSON": {
+                    "type": "string"
+                  },
+                  "signature": {
+                    "type": "string"
+                  },
+                  "userHandle": {
+                    "type": "string"
+                  }
+                },
+                "required": [
+                  "authenticatorData",
+                  "clientDataJSON",
+                  "signature"
+                ]
+              }
+            },
+            "required": [
+              "response"
+            ]
+          }
+        ]
       }
     },
     "parameters": {}
@@ -573,6 +709,143 @@
           },
           "404": {
             "description": "指定されたIDの提出が見つかりません"
+          }
+        }
+      }
+    },
+    "/api/register": {
+      "post": {
+        "summary": "ユーザー登録の開始",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserRegistration"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登録チャレンジの生成",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationChallenge"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "無効なリクエスト"
+          }
+        }
+      }
+    },
+    "/api/register/verify": {
+      "post": {
+        "summary": "登録の検証とトークン発行",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/RegistrationCredential"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "登録成功とトークン発行",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "検証失敗"
+          }
+        }
+      }
+    },
+    "/api/authenticate": {
+      "post": {
+        "summary": "認証の開始",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email"
+                  }
+                },
+                "required": [
+                  "email"
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "認証チャレンジの生成",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationChallenge"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "認証失敗"
+          }
+        }
+      }
+    },
+    "/api/authenticate/verify": {
+      "post": {
+        "summary": "認証の検証とトークン発行",
+        "tags": [
+          "auth"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AuthenticationCredential"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "認証成功とトークン発行",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AuthenticationResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "認証失敗"
           }
         }
       }

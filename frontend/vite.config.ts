@@ -1,4 +1,5 @@
 import { TanStackRouterVite } from "@tanstack/router-plugin/vite"
+import basicSsl from "@vitejs/plugin-basic-ssl"
 import react from "@vitejs/plugin-react-swc"
 import path from "node:path"
 import { defineConfig } from "vitest/config"
@@ -9,6 +10,7 @@ export default defineConfig({
     target: "es2022",
   },
   plugins: [
+    basicSsl(),
     TanStackRouterVite({
       generatedRouteTree: path.resolve(
         import.meta.dirname,

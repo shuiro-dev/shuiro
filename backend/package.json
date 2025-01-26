@@ -23,6 +23,7 @@
     "@hono/zod-openapi": "^0.18.3",
     "@prisma/client": "6.1.0",
     "@scalar/hono-api-reference": "^0.5.163",
+    "@simplewebauthn/server": "^13.0.0",
     "globals": "^15.13.0",
     "hono": "^4.6.13",
     "pyodide": "0.26.4"

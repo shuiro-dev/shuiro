@@ -223,7 +223,6 @@ const getSubmissionsByProblemIdRoute = createRoute({
   tags: ["problems"],
 })
 
-// ルートの設定
 const app = new OpenAPIHono()
   .openapi(getProblemsRoute, async (c) => {
     const problems = await prisma.problem.findMany({
@@ -325,12 +324,10 @@ const app = new OpenAPIHono()
       {
         body: problem.body,
         id: problem.id,
-        supported_languages: problem.supportedLanguages.map(
-          ({ languageName, languageVersion }) => ({
-            name: languageName,
-            version: languageVersion,
-          }),
-        ),
+        supported_languages: problem.supportedLanguages.map(({ language }) => ({
+          name: language.name,
+          version: language.version,
+        })),
         test_cases: problem.testCases.map(({ input, output }) => ({
           input,
           output,
@@ -352,108 +349,94 @@ const app = new OpenAPIHono()
     }
 
     const updatedProblem = await prisma.$transaction(async (tx) => {
-      await tx.language.deleteMany({
-        where: {
-          languageName: {
-            notIn: data.supported_languages.map(({ name }) => name),
-          },
-          languageVersion: {
-            notIn: data.supported_languages.map(({ version }) => version),
-          },
-          problemId,
-        },
-      })
+      // まず既存のデータを全て削除
       await tx.testResult.deleteMany({
         where: {
-          testCase: {
-            input: {
-              notIn: data.test_cases.map(({ input }) => input),
-            },
-            output: {
-              notIn: data.test_cases.map(({ output }) => output),
-            },
-            problemId,
-          },
+          testCase: { problemId },
         },
       })
+
       await tx.testCase.deleteMany({
-        where: {
-          input: {
-            notIn: data.test_cases.map(({ input }) => input),
-          },
-          output: {
-            notIn: data.test_cases.map(({ output }) => output),
-          },
-          problemId,
-        },
+        where: { problemId },
       })
-      return tx.problem.update({
+
+      await tx.language.deleteMany({
+        where: { problemId },
+      })
+
+      // 次に問題を更新
+      const updated = await tx.problem.update({
         data: {
           body: data.body,
-          supportedLanguages: {
-            upsert: data.supported_languages.map(({ name, version }) => ({
-              create: {
-                language: {
-                  connect: {
-                    name_version: {
-                      name,
-                      version,
-                    },
-                  },
-                },
-              },
-              update: {
-                language: {
-                  connect: {
-                    name_version: {
-                      name,
-                      version,
-                    },
-                  },
-                },
-              },
-              where: {
-                languageName_languageVersion_problemId: {
-                  languageName: name,
-                  languageVersion: version,
-                  problemId,
-                },
-              },
-            })),
-          },
-          testCases: {
-            upsert: data.test_cases.map(({ input, output }) => ({
-              create: {
-                input,
-                output,
-              },
-              update: {
-                input,
-                output,
-              },
-              where: {
-                input_output_problemId: {
-                  input,
-                  output,
-                  problemId,
-                },
-              },
-            })),
-          },
           title: data.title,
-        },
-        include: {
-          supportedLanguages: {
-            include: {
-              language: true,
-            },
-          },
-          testCases: true,
         },
         where: {
           id: problemId,
         },
       })
+
+      // サポート言語を追加
+      const languages = await Promise.all(
+        data.supported_languages.map(async (lang) => {
+          const supportedLang = await tx.supportedLanguage.upsert({
+            create: {
+              name: lang.name,
+              version: lang.version,
+            },
+            update: {},
+            where: {
+              name_version: {
+                name: lang.name,
+                version: lang.version,
+              },
+            },
+          })
+
+          return tx.language.create({
+            data: {
+              language: {
+                connect: {
+                  name_version: {
+                    name: supportedLang.name,
+                    version: supportedLang.version,
+                  },
+                },
+              },
+              problem: {
+                connect: {
+                  id: problemId,
+                },
+              },
+            },
+            include: {
+              language: true,
+            },
+          })
+        }),
+      )
+
+      // テストケースを追加
+      const testCases = await Promise.all(
+        data.test_cases.map((testCase) =>
+          tx.testCase.create({
+            data: {
+              input: testCase.input,
+              output: testCase.output,
+              problem: {
+                connect: {
+                  id: problemId,
+                },
+              },
+            },
+          }),
+        ),
+      )
+
+      return {
+        ...updated,
+        supportedLanguages: languages,
+        testCases,
+      }
     })
 
     return c.json({
@@ -468,7 +451,7 @@ const app = new OpenAPIHono()
         output: testCase.output,
       })),
       title: updatedProblem.title,
-    } satisfies z.infer<typeof schemas.Problem>)
+    })
   })
   .openapi(deleteProblemRoute, async (c) => {
     const { problemId } = c.req.valid("param")
@@ -511,15 +494,6 @@ const app = new OpenAPIHono()
           where: { problemId },
         })
 
-        await tx.problem.update({
-          data: {
-            teachers: {
-              set: [],
-            },
-          },
-          where: { id: problemId },
-        })
-
         await tx.problem.delete({
           where: { id: problemId },
         })
@@ -554,7 +528,6 @@ const app = new OpenAPIHono()
         lang.language.version === data.language.version,
     )
     if (!isSupportedLanguage) {
-      // todo: messageとして提出された言語が対応していない旨を返す
       return c.body(null, 400)
     }
 
@@ -604,8 +577,13 @@ const app = new OpenAPIHono()
           },
         },
         student: {
-          connect: {
-            id: 1, // todo: 実際の学生IDを取得し、指定する
+          create: {
+            user: {
+              create: {
+                email: `temp_${Date.now()}@example.com`,
+                name: "Temporary User",
+              },
+            },
           },
         },
         testResults: {
@@ -670,15 +648,14 @@ const app = new OpenAPIHono()
       code: submission.code,
       id: submission.id,
       language: {
-        name: submission.languageName,
-        version: submission.languageVersion,
+        name: submission.language.name,
+        version: submission.language.version,
       },
       problem_id: submission.problemId,
       result: {
         message: submission.result.message,
         status: submission.result.status.status,
       },
-      student_id: submission.studentId,
       submitted_at: submission.createdAt.toISOString(),
       test_results: submission.testResults.map((result) => ({
         message: result.message,

@@ -10,20 +10,54 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+model User {
+  id          String       @id @default(cuid())
+  email       String       @unique
+  name        String
+  role        String       @default("student")
+  credentials Credential[]
+  challenges  Challenge[]
+  teacher     Teacher?
+  student     Student?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  @@index([role])
+}
+
+model Credential {
+  id        String   @id
+  publicKey Bytes
+  counter   BigInt
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Challenge {
+  id        String   @id @default(cuid())
+  challenge String
+  userId    String
+  user      User     @relation(fields: [userId], references: [id])
+  createdAt DateTime @default(now())
+  expiresAt DateTime @default(now())
+}
+
 model Teacher {
   id        Int       @id @default(autoincrement())
-  name      String
-  email     String    @unique
-  problems  Problem[] // A teacher can be assigned multiple problems
+  user      User      @relation(fields: [userId], references: [id])
+  userId    String    @unique
+  problems  Problem[]
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
 }
 
 model Student {
   id          Int          @id @default(autoincrement())
-  name        String
-  email       String       @unique
-  submissions Submission[] // A student can make multiple submissions
+  user        User         @relation(fields: [userId], references: [id])
+  userId      String       @unique
+  submissions Submission[]
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
 }
@@ -32,18 +66,18 @@ model Problem {
   id                 Int          @id @default(autoincrement())
   title              String
   body               String
-  testCases          TestCase[] // A problem has multiple test cases
-  supportedLanguages Language[] // Supported languages for the problem
-  submissions        Submission[] // Multiple students can submit to this problem
-  teachers           Teacher[] // A problem can be assigned to multiple teachers
+  testCases          TestCase[]
+  supportedLanguages Language[]
+  submissions        Submission[]
+  teachers           Teacher[]
   createdAt          DateTime     @default(now())
   updatedAt          DateTime     @updatedAt
 }
 
 model TestCase {
   id        Int          @id @default(autoincrement())
-  input     String // Input for the test case
-  output    String // Expected output for the test case
+  input     String
+  output    String
   problem   Problem      @relation(fields: [problemId], references: [id])
   problemId Int
   results   TestResult[]
@@ -69,7 +103,7 @@ model TestResult {
 }
 
 model TestStatus {
-  status  String       @id // e.g., 'Passed', 'Failed'
+  status  String       @id
   results TestResult[]
 }
 
@@ -93,13 +127,11 @@ model Language {
   problemId       Int?
   createdAt       DateTime          @default(now())
   updatedAt       DateTime          @updatedAt
-
-  @@unique([languageName, languageVersion, problemId])
 }
 
 model Submission {
   id              Int               @id @default(autoincrement())
-  code            String // Submitted code
+  code            String
   language        SupportedLanguage @relation(fields: [languageName, languageVersion], references: [name, version])
   languageName    String
   languageVersion String
@@ -125,6 +157,13 @@ model SubmissionResult {
 }
 
 model SubmissionStatus {
-  status  String             @id // e.g., 'Accepted', 'Wrong Answer'
+  status  String             @id
   results SubmissionResult[]
+}
+
+model Role {
+  id        Int      @id @default(autoincrement())
+  name      String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -126,6 +126,197 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/register": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** ユーザー登録の開始 */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: {
+        content: {
+          "application/json": components["schemas"]["UserRegistration"]
+        }
+      }
+      responses: {
+        /** @description 登録チャレンジの生成 */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["AuthenticationChallenge"]
+          }
+        }
+        /** @description 無効なリクエスト */
+        400: {
+          headers: {
+            [name: string]: unknown
+          }
+          content?: never
+        }
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/register/verify": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** 登録の検証とトークン発行 */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: {
+        content: {
+          "application/json": components["schemas"]["RegistrationCredential"]
+        }
+      }
+      responses: {
+        /** @description 登録成功とトークン発行 */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["AuthenticationResponse"]
+          }
+        }
+        /** @description 検証失敗 */
+        400: {
+          headers: {
+            [name: string]: unknown
+          }
+          content?: never
+        }
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/authenticate": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** 認証の開始 */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: {
+        content: {
+          "application/json": {
+            /** Format: email */
+            email: string
+          }
+        }
+      }
+      responses: {
+        /** @description 認証チャレンジの生成 */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["AuthenticationChallenge"]
+          }
+        }
+        /** @description 認証失敗 */
+        401: {
+          headers: {
+            [name: string]: unknown
+          }
+          content?: never
+        }
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
+  "/api/authenticate/verify": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    get?: never
+    put?: never
+    /** 認証の検証とトークン発行 */
+    post: {
+      parameters: {
+        query?: never
+        header?: never
+        path?: never
+        cookie?: never
+      }
+      requestBody?: {
+        content: {
+          "application/json": components["schemas"]["AuthenticationCredential"]
+        }
+      }
+      responses: {
+        /** @description 認証成功とトークン発行 */
+        200: {
+          headers: {
+            [name: string]: unknown
+          }
+          content: {
+            "application/json": components["schemas"]["AuthenticationResponse"]
+          }
+        }
+        /** @description 認証失敗 */
+        401: {
+          headers: {
+            [name: string]: unknown
+          }
+          content?: never
+        }
+      }
+    }
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -188,6 +379,39 @@ export interface components {
     SubmissionCreate: {
       code: string
       language: components["schemas"]["Language"]
+    }
+    AuthenticationChallenge: {
+      challenge: string
+    }
+    UserRegistration: {
+      /** Format: email */
+      email: string
+      name: string
+      /** @enum {string} */
+      role: "admin" | "teacher" | "student"
+    }
+    AuthenticationResponse: {
+      token: string
+    }
+    Credential: {
+      id: string
+      rawId: string
+      /** @enum {string} */
+      type: "public-key"
+    }
+    RegistrationCredential: components["schemas"]["Credential"] & {
+      response: {
+        attestationObject: string
+        clientDataJSON: string
+      }
+    }
+    AuthenticationCredential: components["schemas"]["Credential"] & {
+      response: {
+        authenticatorData: string
+        clientDataJSON: string
+        signature: string
+        userHandle?: string
+      }
     }
   }
   responses: never

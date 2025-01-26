@@ -6,6 +6,15 @@ import createQueryClient from "openapi-react-query"
 export const BACKEND_URL: string =
   import.meta.env.BACKEND_URL ?? "http://localhost:3000"
 
+const authMiddleware: Middleware = {
+  onRequest: async ({ request }) => {
+    const token = localStorage.getItem("token")
+    if (token) {
+      request.headers.set("Authorization", `Bearer ${token}`)
+    }
+  },
+}
+
 export class APIError extends Error {
   static {
     this.prototype.name = "APIError"
@@ -48,6 +57,54 @@ export class APIError extends Error {
   }
 }
 
+export const authApi = {
+  // 認証フロー
+  authenticate: async (email: string) => {
+    const res = await fetch("/api/authenticate", {
+      body: JSON.stringify({ email }),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    })
+    if (!res.ok) throw new Error("Authentication failed")
+    return res.json()
+  },
+
+  // 登録フロー
+  register: async (data: {
+    email: string
+    name: string
+    role: "admin" | "student" | "teacher"
+  }) => {
+    const res = await fetch("/api/register", {
+      body: JSON.stringify(data),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    })
+    if (!res.ok) throw new Error("Registration failed")
+    return res.json()
+  },
+
+  verifyAuthentication: async (credential: string) => {
+    const res = await fetch("/api/authenticate/verify", {
+      body: JSON.stringify(credential),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    })
+    if (!res.ok) throw new Error("Authentication verification failed")
+    return res.json()
+  },
+
+  verifyRegistration: async (credential: string) => {
+    const res = await fetch("/api/register/verify", {
+      body: JSON.stringify(credential),
+      headers: { "Content-Type": "application/json" },
+      method: "POST",
+    })
+    if (!res.ok) throw new Error("Registration verification failed")
+    return res.json()
+  },
+}
+
 /**
  * Middleware that throws an error if the response status is 404 or greater.
  *
@@ -69,6 +126,14 @@ const throwOnError: Middleware = {
 export const client = createFetchClient<paths>({
   baseUrl: BACKEND_URL,
 })
+client.use(authMiddleware)
 client.use(throwOnError)
 
 export const $api = createQueryClient(client)
+
+export const auth = {
+  getToken: () => localStorage.getItem("token"),
+  isAuthenticated: () => !!localStorage.getItem("token"),
+  removeToken: () => localStorage.removeItem("token"),
+  setToken: (token: string) => localStorage.setItem("token", token),
+}

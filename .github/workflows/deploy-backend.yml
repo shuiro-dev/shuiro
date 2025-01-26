@@ -11,6 +11,7 @@ env:
   REGION: ${{ secrets.GOOGLE_CLOUD_REGION }}
   REPOSITORY: ${{ secrets.ARTIFACT_REGISTRY_REPOSITORY }}
   IMAGE: ${{ secrets.DOCKER_IMAGE }}
+  JWT_SECRET: ${{ secrets.JWT_SECRET }}
 
 jobs:
   changes:

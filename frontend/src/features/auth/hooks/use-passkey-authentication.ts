@@ -16,13 +16,12 @@ type AuthenticationVerifyResponse =
 
 /**
  * パスキー認証のカスタムフック
- * @returns {{
- *   login: (email: string) => Promise<AuthenticationVerifyResponse>,
- *   isLoading: boolean,
- *   error: Error | null
- * }}
  */
-export function usePasskeyAuthentication() {
+export const usePasskeyAuthentication = (): {
+  login: (email: string) => Promise<AuthenticationVerifyResponse>
+  isLoading: boolean
+  error: Error | null
+} => {
   const authMutation = useMutation({
     mutationFn: async (email: string): Promise<AuthenticationResponse> => {
       const { data, error } = await client.POST("/api/authenticate", {
@@ -126,10 +125,10 @@ export function usePasskeyAuthentication() {
 
 /**
  * ArrayBufferをBase64URL形式の文字列に変換
- * @param {ArrayBuffer | ArrayBufferLike} buffer - 変換対象のバッファ
- * @returns {string} Base64URL形式の文字列
+ * @param buffer - 変換対象のバッファ
+ * @returns Base64URL形式の文字列
  */
-function arrayBufferToBase64(buffer: ArrayBuffer | ArrayBufferLike): string {
+const arrayBufferToBase64 = (buffer: ArrayBuffer | ArrayBufferLike): string => {
   const uint8Array =
     buffer instanceof Uint8Array ? buffer : new Uint8Array(buffer)
   return btoa(String.fromCodePoint(...uint8Array))
@@ -140,10 +139,10 @@ function arrayBufferToBase64(buffer: ArrayBuffer | ArrayBufferLike): string {
 
 /**
  * Base64文字列をArrayBufferに変換
- * @param {string} base64 - Base64形式の文字列
- * @returns {Uint8Array} 変換されたUint8Array
+ * @param base64 - Base64形式の文字列
+ * @returns 変換されたUint8Array
  */
-function base64ToArrayBuffer(base64: string): Uint8Array {
+const base64ToArrayBuffer = (base64: string): Uint8Array => {
   const standardBase64 = base64
     .replaceAll("-", "+")
     .replaceAll("_", "/")

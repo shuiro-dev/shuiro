@@ -14,16 +14,15 @@ import * as schemas from "../components/schemas/auth"
 
 /**
  * 環境設定
- * @typedef {Object} Config
- * @property {string} jwtSecret - JWT署名用の秘密鍵
- * @property {string} origin - アプリケーションのオリジン
- * @property {string} rpId - Relying Party ID
- * @property {string} rpName - Relying Party名
  */
 const config = {
+  /** JWT署名用の秘密鍵 */
   jwtSecret: process.env.JWT_SECRET,
+  /** アプリケーションのオリジン */
   origin: process.env.RP_ORIGIN || "https://localhost:5173",
+  /** Relying Party ID */
   rpId: process.env.RP_ID || "localhost",
+  /** Relying Party名 */
   rpName: process.env.RP_NAME || "Shuiro",
 }
 
@@ -38,12 +37,15 @@ const AUTH_ERROR = "認証に失敗しました。入力内容をご確認くだ
 
 /**
  * JWT トークンを生成する
- * @param {Object} payload - ペイロードデータ
- * @param {string} payload.role - ユーザーロール
- * @param {string} payload.sub - ユーザーID
- * @returns {Promise<string>} 生成されたJWTトークン
+ * @param payload - ペイロードデータ
+ * @param payload.role - ユーザーロール
+ * @param payload.sub - ユーザーID
+ * @returns 生成されたJWTトークン
  */
-const createToken = async (payload: { role: string; sub: string }) => {
+const createToken = async (payload: {
+  role: string
+  sub: string
+}): Promise<string> => {
   return await sign(
     {
       ...payload,
@@ -55,9 +57,9 @@ const createToken = async (payload: { role: string; sub: string }) => {
 
 /**
  * JWT認証ミドルウェア
- * @param {Context} c - Honoコンテキスト
- * @param {Next} next - 次のミドルウェア
- * @returns {Promise<Response>} レスポンス
+ * @param c - Honoコンテキスト
+ * @param next - 次のミドルウェア
+ * @returns レスポンス
  * @throws {Error} 認証エラー
  */
 export const authMiddleware = async (c: Context, next: Next) => {
@@ -105,8 +107,8 @@ export const getCurrentUser = (c: Context) => {
 
 /**
  * 特定のロールを要求するミドルウェア
- * @param {string[]} allowedRoles - 許可するロール
- * @returns {(c: Context, next: Next) => Promise<Response>} ミドルウェア関数
+ * @param allowedRoles - 許可するロール
+ * @returns ミドルウェア関数
  */
 export const requireRole = (allowedRoles: string[]) => {
   return async (c: Context, next: Next) => {
@@ -467,10 +469,10 @@ const app = new OpenAPIHono()
 
 /**
  * Base64文字列をBase64URL形式に変換する
- * @param {string} base64 - 変換元のBase64文字列
- * @returns {string} Base64URL形式の文字列
+ * @param base64 - 変換元のBase64文字列
+ * @returns Base64URL形式の文字列
  */
-function base64ToBase64URL(base64: string): string {
+const base64ToBase64URL = (base64: string): string => {
   return base64.replaceAll("+", "-").replaceAll("/", "_").replaceAll("=", "")
 }
 

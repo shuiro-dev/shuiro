@@ -3,28 +3,29 @@ import { useMutation } from "@tanstack/react-query"
 import { paths } from "openapi/schema"
 
 /**
- * 登録レスポンスの型定義
- * @typedef {Object} RegistrationResponse - OpenAPIスキーマから生成された登録レスポンス型
+ * OpenAPIスキーマから生成された登録レスポンス型
  */
 type RegistrationResponse =
   paths["/api/register"]["post"]["responses"]["200"]["content"]["application/json"]
 
 /**
- * 登録確認レスポンスの型定義
- * @typedef {Object} RegistrationVerifyResponse - OpenAPIスキーマから生成された登録確認レスポンス型
+ * OpenAPIスキーマから生成された登録確認レスポンス型
  */
 type RegistrationVerifyResponse =
   paths["/api/register/verify"]["post"]["responses"]["200"]["content"]["application/json"]
 
 /**
  * パスキー登録のカスタムフック
- * @returns {{
- *  register: (data: { email: string, name: string, role: "admin" | "student" | "teacher" }) => Promise<RegistrationVerifyResponse>,
- * isLoading: boolean,
- * error: Error | null
- * }}
  */
-export function usePasskeyRegistration() {
+export const usePasskeyRegistration = (): {
+  register: (data: {
+    email: string
+    name: string
+    role: "admin" | "student" | "teacher"
+  }) => Promise<RegistrationVerifyResponse>
+  isLoading: boolean
+  error: Error | null
+} => {
   const registerMutation = useMutation({
     mutationFn: async (data: {
       email: string
@@ -69,11 +70,11 @@ export function usePasskeyRegistration() {
 
   /**
    * パスキーの登録処理を実行
-   * @param {Object} data - 登録に必要なユーザー情報
-   * @param {string} data.email - ユーザーのメールアドレス
-   * @param {string} data.name - ユーザーの表示名
-   * @param {"admin" | "student" | "teacher"} data.role - ユーザーの役割
-   * @returns {Promise<RegistrationVerifyResponse>} 登録完了後のレスポンス
+   * @param data - 登録に必要なユーザー情報
+   * @param data.email - ユーザーのメールアドレス
+   * @param data.name - ユーザーの表示名
+   * @param data.role - ユーザーの役割
+   * @returns 登録完了後のレスポンス
    * @throws {Error} 登録処理中にエラーが発生した場合
    */
   const register = async (data: {
@@ -173,11 +174,11 @@ export function usePasskeyRegistration() {
 
 /**
  * ArrayBufferをBase64URL形式の文字列に変換
- * @param {ArrayBuffer} buffer - 変換対象のバッファ
- * @returns {string} Base64URL形式の文字列
+ * @param buffer - 変換対象のバッファ
+ * @returns Base64URL形式の文字列
  * @description バイナリデータをBase64URL形式に変換し、Web APIで使用可能な形式にする
  */
-function arrayBufferToBase64(buffer: ArrayBuffer): string {
+const arrayBufferToBase64 = (buffer: ArrayBuffer): string => {
   const binary = String.fromCodePoint(...new Uint8Array(buffer))
   return btoa(binary)
     .replaceAll("+", "-")
@@ -187,11 +188,11 @@ function arrayBufferToBase64(buffer: ArrayBuffer): string {
 
 /**
  * Base64文字列をArrayBufferに変換
- * @param {string} base64 - Base64形式の文字列
- * @returns {ArrayBuffer} 変換されたArrayBuffer
+ * @param base64 - Base64形式の文字列
+ * @returns 変換されたArrayBuffer
  * @throws {Error} Base64文字列が無効な場合
  */
-function base64ToArrayBuffer(base64: string): ArrayBuffer {
+const base64ToArrayBuffer = (base64: string): ArrayBuffer => {
   try {
     const padded =
       base64.length % 4 === 0

@@ -849,6 +849,30 @@
           }
         }
       }
+    },
+    "/api/languages": {
+      "get": {
+        "operationId": "getLanguages",
+        "summary": "利用可能なプログラミング言語の一覧を取得する",
+        "tags": [
+          "languages"
+        ],
+        "responses": {
+          "200": {
+            "description": "利用可能なプログラミング言語の一覧",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/Language"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
     }
   },
   "webhooks": {}

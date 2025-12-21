@@ -3,6 +3,7 @@ import { apiReference } from "@scalar/hono-api-reference"
 import { cors } from "hono/cors"
 
 import authApp from "./api/paths/auth"
+import languagesApp from "./api/paths/languages"
 import problemsApp from "./api/paths/problems"
 import submissionsApp from "./api/paths/submissions"
 const app = new OpenAPIHono()
@@ -38,6 +39,7 @@ export const routes = app
   .route("/api", problemsApp)
   .route("/api", submissionsApp)
   .route("/api", authApp)
+  .route("/api", languagesApp)
   .get("/api/docs", apiReference({ spec: { url: "/api/openapi.json" } }))
 
 export type AppType = typeof routes

@@ -19,6 +19,7 @@ const Problem = () => {
       },
     },
   })
+  const languages = $api.useSuspenseQuery("get", "/api/languages")
   const updateProblem = $api.useMutation("put", "/api/problems/{problemId}")
 
   return (
@@ -39,6 +40,7 @@ const Problem = () => {
           })
         }}
         problem={problem.data}
+        availableLanguages={languages.data}
         submitButtonLabel="問題を更新"
         submitButtonSubmittingLabel="問題を更新中..."
       />

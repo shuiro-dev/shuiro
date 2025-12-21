@@ -317,6 +317,23 @@ export interface paths {
     patch?: never
     trace?: never
   }
+  "/api/languages": {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    /** 利用可能なプログラミング言語の一覧を取得する */
+    get: operations["getLanguages"]
+    put?: never
+    post?: never
+    delete?: never
+    options?: never
+    head?: never
+    patch?: never
+    trace?: never
+  }
 }
 export type webhooks = Record<string, never>
 export interface components {
@@ -694,6 +711,26 @@ export interface operations {
           [name: string]: unknown
         }
         content?: never
+      }
+    }
+  }
+  getLanguages: {
+    parameters: {
+      query?: never
+      header?: never
+      path?: never
+      cookie?: never
+    }
+    requestBody?: never
+    responses: {
+      /** @description 利用可能なプログラミング言語の一覧 */
+      200: {
+        headers: {
+          [name: string]: unknown
+        }
+        content: {
+          "application/json": components["schemas"]["Language"][]
+        }
       }
     }
   }

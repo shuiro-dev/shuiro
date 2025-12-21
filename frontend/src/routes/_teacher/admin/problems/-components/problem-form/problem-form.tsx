@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Tooltip,
@@ -13,6 +20,7 @@ import { cn } from "@/lib/utils"
 import { useForm } from "@tanstack/react-form"
 import { valibotValidator } from "@tanstack/valibot-form-adapter"
 import { Trash2Icon } from "lucide-react"
+import { components } from "openapi/schema"
 import { FC } from "react"
 import * as v from "valibot"
 
@@ -22,8 +30,7 @@ import { SubmitButton } from "./submit-button"
 
 const problemSchema = v.object({
   body: v.string(),
-  newLanguage: v.optional(v.string()),
-  newVersion: v.optional(v.string()),
+  new_language: v.optional(v.string()),
   supported_languages: v.pipe(
     v.array(
       v.object({
@@ -58,15 +65,19 @@ const problemSchema = v.object({
 })
 
 export type ProblemFormProps = {
+  availableLanguages: Language[]
   onSubmit: (values: Problem) => void
   problem: Problem
   submitButtonLabel: string
   submitButtonSubmittingLabel: string
 }
 
+type Language = components["schemas"]["Language"]
+
 type Problem = v.InferInput<typeof problemSchema>
 
 export const ProblemForm: FC<ProblemFormProps> = ({
+  availableLanguages,
   onSubmit,
   problem,
   submitButtonLabel,
@@ -75,7 +86,6 @@ export const ProblemForm: FC<ProblemFormProps> = ({
   const form = useForm({
     defaultValues: problem,
     onSubmit: (values) => {
-      console.log(values.value)
       onSubmit(values.value)
     },
     validatorAdapter: valibotValidator(),
@@ -281,39 +291,27 @@ export const ProblemForm: FC<ProblemFormProps> = ({
 
               <div className="flex items-end gap-2">
                 <div className="grid flex-1 gap-2">
-                  <Label>言語</Label>
-                  <form.Field name="newLanguage">
+                  <Label>プログラミング言語</Label>
+                  <form.Field name="new_language">
                     {(field) => (
-                      <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        onChange={(e) => field.handleChange(e.target.value)}
+                      <Select
+                        onValueChange={(value) => field.handleChange(value)}
                         value={field.state.value}
                       >
-                        <option value="">言語を選択</option>
-                        <option value="C++">C++</option>
-                        <option value="Python">Python</option>
-                        <option value="JavaScript">JavaScript</option>
-                        <option value="Java">Java</option>
-                      </select>
-                    )}
-                  </form.Field>
-                </div>
-
-                <div className="grid flex-1 gap-2">
-                  <Label>バージョン</Label>
-                  <form.Field name="newVersion">
-                    {(field) => (
-                      <select
-                        className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-                        onChange={(e) => field.handleChange(e.target.value)}
-                        value={field.state.value}
-                      >
-                        <option value="">バージョンを選択</option>
-                        <option value="vC++20">vC++20</option>
-                        <option value="v3.11">v3.11</option>
-                        <option value="ES2022">ES2022</option>
-                        <option value="17">17</option>
-                      </select>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="プログラミング言語を選択" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {availableLanguages.map((lang) => (
+                            <SelectItem
+                              key={`${lang.name}::${lang.version}`}
+                              value={`${lang.name}::${lang.version}`}
+                            >
+                              {lang.name} {lang.version}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     )}
                   </form.Field>
                 </div>
@@ -321,15 +319,14 @@ export const ProblemForm: FC<ProblemFormProps> = ({
                 <Button
                   className="px-8"
                   onClick={() => {
-                    const newLang = form.getFieldValue("newLanguage")
-                    const newVer = form.getFieldValue("newVersion")
-                    if (newLang && newVer) {
+                    const newLanguage = form.getFieldValue("new_language")
+                    if (newLanguage) {
+                      const [lang, ver] = newLanguage.split("::")
                       languages.pushValue({
-                        name: newLang,
-                        version: newVer,
+                        name: lang,
+                        version: ver,
                       })
-                      form.setFieldValue("newLanguage", undefined)
-                      form.setFieldValue("newVersion", undefined)
+                      form.setFieldValue("new_language", "")
                     }
                   }}
                   type="button"

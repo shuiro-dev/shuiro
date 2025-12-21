@@ -26,6 +26,7 @@ const Problem = () => {
     <div className="mx-auto w-full max-w-screen-xl px-4 py-6">
       <h1 className="mb-6 text-2xl font-semibold">問題の更新</h1>
       <ProblemForm
+        availableLanguages={languages.data}
         onSubmit={(values) => {
           updateProblem.mutate({
             body: values,
@@ -40,7 +41,6 @@ const Problem = () => {
           })
         }}
         problem={problem.data}
-        availableLanguages={languages.data}
         submitButtonLabel="問題を更新"
         submitButtonSubmittingLabel="問題を更新中..."
       />

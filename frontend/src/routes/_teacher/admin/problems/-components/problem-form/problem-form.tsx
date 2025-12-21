@@ -1,6 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { Textarea } from "@/components/ui/textarea"
 import {
   Tooltip,
@@ -13,20 +20,13 @@ import { cn } from "@/lib/utils"
 import { useForm } from "@tanstack/react-form"
 import { valibotValidator } from "@tanstack/valibot-form-adapter"
 import { Trash2Icon } from "lucide-react"
+import { components } from "openapi/schema"
 import { FC } from "react"
 import * as v from "valibot"
 
 import { DataTable } from "./data-table"
 import { FieldInfo } from "./field-info"
 import { SubmitButton } from "./submit-button"
-import { components } from "openapi/schema"
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select"
 
 const problemSchema = v.object({
   body: v.string(),
@@ -65,21 +65,21 @@ const problemSchema = v.object({
 })
 
 export type ProblemFormProps = {
+  availableLanguages: Language[]
   onSubmit: (values: Problem) => void
   problem: Problem
-  availableLanguages: Language[]
   submitButtonLabel: string
   submitButtonSubmittingLabel: string
 }
 
-type Problem = v.InferInput<typeof problemSchema>
-
 type Language = components["schemas"]["Language"]
 
+type Problem = v.InferInput<typeof problemSchema>
+
 export const ProblemForm: FC<ProblemFormProps> = ({
+  availableLanguages,
   onSubmit,
   problem,
-  availableLanguages,
   submitButtonLabel,
   submitButtonSubmittingLabel,
 }) => {

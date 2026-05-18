@@ -78,7 +78,7 @@
     "eslint-plugin-react-hooks": "5.1.0",
     "eslint-plugin-react-refresh": "0.4.16",
     "eslint-plugin-unicorn": "56.0.1",
-    "globals": "15.13.0",
+    "globals": "15.15.0",
     "happy-dom": "15.11.7",
     "msw": "2.7.0",
     "openapi": "workspace:*",

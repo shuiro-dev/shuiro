@@ -17,7 +17,7 @@ jobs:
       tool-versions: ${{ steps.changes.outputs.tool-versions }}
       workflows: ${{ steps.changes.outputs.workflows }}
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Check Dockerfile files changed
         uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
         id: changes
@@ -39,7 +39,7 @@ jobs:
     needs: changes
     if: needs.changes.outputs.dockerfile == 'true' || needs.changes.outputs.tool-versions == 'true' || needs.changes.outputs.workflows == 'true'
     steps:
-      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - name: Login to GitHub Container Registry
         uses: docker/login-action@7ca345011ac4304463197fac0e56eab1bc7e6af0
         with:

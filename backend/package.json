@@ -19,7 +19,7 @@
     "postinstall": "bun run src/bin/postinstall.ts"
   },
   "dependencies": {
-    "@hono/node-server": "^1.13.7",
+    "@hono/node-server": "^2.0.5",
     "@hono/zod-openapi": "^0.18.3",
     "@prisma/client": "6.1.0",
     "@scalar/hono-api-reference": "^0.5.163",

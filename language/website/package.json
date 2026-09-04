@@ -24,7 +24,7 @@
     "@bytecodealliance/preview2-shim": "^0.17.1",
     "@monaco-editor/react": "^4.6.0",
     "@rollup/browser": "^4.28.1",
-    "astro": "^5.0.0",
+    "astro": "^7.1.0",
     "clsx": "^2.1.1",
     "framer-motion": "^11.13.1",
     "justd-icons": "^1.9.1",

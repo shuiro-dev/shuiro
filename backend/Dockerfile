@@ -1,4 +1,4 @@
-FROM ubuntu:24.04@sha256:99c35190e22d294cdace2783ac55effc69d32896daaa265f0bbedbcde4fbe3e5 AS base
+FROM ubuntu:24.04@sha256:a853f94d226358a79c740cfc7bce0c289748f3fe3488d921d038ccd752c61b60 AS base
 SHELL ["/bin/bash", "-o", "pipefail", "-c"]
 RUN groupadd -r appuser && useradd -r -g appuser -s /bin/false appuser
 WORKDIR /app

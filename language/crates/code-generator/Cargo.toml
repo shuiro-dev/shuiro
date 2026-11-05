@@ -9,7 +9,7 @@ parser = { workspace = true }
 pretty_assertions = { workspace = true }
 tokenizer = { workspace = true }
 wasmtime = "27.0.0"
-wasmtime-wasi = "27.0.0"
+wasmtime-wasi = "36.0.0"
 
 [dependencies]
 anyhow = { workspace = true }
